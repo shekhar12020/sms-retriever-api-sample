@@ -6,6 +6,7 @@ import android.content.Intent
 import com.google.android.gms.auth.api.phone.SmsRetriever
 import com.google.android.gms.common.api.CommonStatusCodes
 import com.google.android.gms.common.api.Status
+import java.util.regex.Pattern
 
 class MySMSBroadcastReceiver : BroadcastReceiver() {
 
@@ -28,12 +29,18 @@ class MySMSBroadcastReceiver : BroadcastReceiver() {
                     // Get SMS message contents
                     var otp: String = extras.get(SmsRetriever.EXTRA_SMS_MESSAGE) as String
 
+                    val pattern = Pattern.compile("(\\d{4})")
+                    val matcher = pattern.matcher(otp)
+
                     // Extract one-time code from the message and complete verification
-                    if (otpReceiver != null) {
-                        otp = otp.replace("<#>", "")
-                            .split("\n".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()[0]
-                        otpReceiver?.onOTPReceived(otp)
+                    var value = ""
+                    if (matcher.find()) {
+                        System.out.println(matcher.group(1))
+                        value = matcher.group(1)
                     }
+
+                    println("message : $value")
+                    otpReceiver?.onOTPReceived(value)
                 }
 
                 CommonStatusCodes.TIMEOUT ->
